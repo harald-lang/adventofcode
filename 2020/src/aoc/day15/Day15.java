@@ -1,11 +1,11 @@
 package aoc.day15;
 
+import com.carrotsearch.hppc.IntIntHashMap;
 import lombok.val;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import static java.lang.System.out;
 import static java.util.stream.Collectors.toList;
@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toList;
 public class Day15 {
 
     public static void main(String[] args) throws Exception {
+        val m = System.currentTimeMillis();
         val inputPath = Path.of(Day15.class.getResource("input.txt").getPath());
         val inputs =  Files.readAllLines(inputPath);
 
@@ -20,7 +21,7 @@ public class Day15 {
                 .map(Integer::parseInt)
                 .collect(toList());
 
-        val idx = new HashMap<Integer, Integer>();
+        val idx = new IntIntHashMap();
         for (int turn = 0; turn < ints.size() - 1; ++turn) {
             idx.put(ints.get(turn), turn);
         }
@@ -32,16 +33,17 @@ public class Day15 {
         int prevSpokenNo = ints.get(initNumberCnt - 1);
         for (int turn = initNumberCnt; turn < turnCnt; ++turn) {
             val tmp = prevSpokenNo;
-            val j = idx.get(tmp);
-            if (j == null) {
+            if (!idx.containsKey(tmp)) {
                 prevSpokenNo = 0;
             }
             else {
+                val j = idx.get(tmp);
                 prevSpokenNo = turn - 1 - j;
             }
             idx.put(tmp, turn - 1);
         }
 
+        out.println("runtime: " + (System.currentTimeMillis() - m) + " [ms]");
         out.println("part x: " + prevSpokenNo);
     }
 
