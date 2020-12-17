@@ -1,0 +1,2 @@
+# Alex' given input. - expected output: 59006
+19,20,14,0,9,1
