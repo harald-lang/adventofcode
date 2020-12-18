@@ -1,12 +1,13 @@
 package aoc.day17;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Maps;
 import lombok.Value;
 import lombok.val;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,23 @@ public class Day17 {
             return neighbors;
         }
 
+        @Override
+        public boolean equals(Object other) {
+            C3 o = (C3) other;
+            return x == o.x
+                    & y == o.y
+                    & z == o.z;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 1;
+            result =  97 * result + x;
+            result =  79 * result + y;
+            result = 101 * result + z;
+            return result;
+        }
+
     }
 
 
@@ -104,6 +122,25 @@ public class Day17 {
             return neighbors;
         }
 
+        @Override
+        public boolean equals(Object other) {
+            C4 o = (C4) other;
+            return x == o.x
+                    & y == o.y
+                    & z == o.z
+                    & w == o.w;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 1;
+            result =  97 * result + x;
+            result =  79 * result + y;
+            result = 101 * result + z;
+            result =  31 * result + w;
+            return result;
+        }
+
     }
 
     private enum CubeState {
@@ -112,12 +149,12 @@ public class Day17 {
 
     private static class PocketDimension {
 
-        private final Map<Coordinate, CubeState> grid = new HashMap<>();
+        private final Map<Coordinate, CubeState> grid = Maps.newHashMap();
 
         public void activate(Coordinate coordinate) {
             // Activate the cube at the given coordinate.
             grid.put(coordinate, CubeState.ACTIVE);
-            // Make sure the halo is indexed.
+            // Make sure the halo is indexed as well.
             coordinate.neighbors(n -> {
                 if (!isActive(n)) {
                     grid.put(n, CubeState.INACTIVE);
@@ -131,14 +168,18 @@ public class Day17 {
         }
 
         public int countActiveNeighbors(Coordinate c) {
-            return (int) c.getNeighbors().stream()
-                    .filter(this::isActive)
-                    .count();
+            val cnt = new MutableInt(0);
+            c.neighbors(n -> {
+                if (isActive(n)) {
+                    cnt.increment();
+                }
+            });
+            return cnt.getValue();
         }
 
         public long countActiveCubes() {
-            return grid.keySet().stream()
-                    .filter(this::isActive)
+            return grid.entrySet().stream()
+                    .filter(kv -> kv.getValue() == CubeState.ACTIVE)
                     .count();
         }
 
@@ -172,8 +213,10 @@ public class Day17 {
         var d3 = new PocketDimension();
         var d4 = new PocketDimension();
         for (int y = 0; y < input.size(); y++) {
-            for (int x = 0; x < input.get(0).length(); x++) {
-                if (input.get(y).charAt(x) == '#') {
+            val line = input.get(y);
+            val lineLength = line.length();
+            for (int x = 0; x < lineLength; x++) {
+                if (line.charAt(x) == '#') {
                     d3.activate(C3.of(x, y, 0));
                     d4.activate(C4.of(x, y, 0, 0));
                 }
